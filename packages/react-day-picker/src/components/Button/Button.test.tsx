@@ -1,44 +1,57 @@
 import React from 'react';
 
-import { PageObjects } from '@test/po/PageObjects';
 import { customRender } from '@test/render';
 
-import { Button } from './Button';
+import { DayPickerProps } from '../../types';
+import { Button, ButtonProps } from './Button';
 
-const po = new PageObjects(new Date());
+let button: HTMLButtonElement;
+
+function setup(props?: ButtonProps, context?: DayPickerProps) {
+  const renderResult = customRender(<Button {...props} />, context);
+  button = renderResult.container.firstChild as HTMLButtonElement;
+}
 
 describe('when rendered without props', () => {
-  beforeEach(() => {
-    customRender(<Button className="foo" style={{ color: 'blue' }} />);
-  });
+  beforeEach(() => setup());
   test('should render a button with type "button"', () => {
-    expect(po.button).toHaveAttribute('type', 'button');
+    expect(button).toHaveAttribute('type', 'button');
   });
   test('should render a button with the button class name', () => {
-    expect(po.button).toHaveClass('rdp-button');
+    expect(button).toHaveClass('rdp-button');
   });
   test('should render a button with the reset class name', () => {
-    expect(po.button).toHaveClass('rdp-button_reset');
+    expect(button).toHaveClass('rdp-button_reset');
   });
+});
+
+describe('when rendered with the className prop', () => {
+  const className = 'foo';
+  beforeEach(() => setup({ className }));
   test('should add the class name', () => {
-    expect(po.button).toHaveClass('foo');
+    expect(button).toHaveClass(className);
   });
-  test('should apply the style', () => {
-    expect(po.button).toHaveStyle({ color: 'blue' });
+});
+
+describe('when rendered with the style prop', () => {
+  const style = { color: 'blue' };
+  beforeEach(() => setup({ style }));
+  test('should add the class name', () => {
+    expect(button).toHaveStyle(style);
   });
 });
 
 describe('when using class names and styles from context', () => {
-  beforeEach(() => {
-    customRender(<Button />, {
-      classNames: { button: 'foo' },
-      styles: { button: { color: 'red' } }
-    });
-  });
+  const context = {
+    classNames: { button: 'foo' },
+    styles: { button: { color: 'red' } }
+  };
+  beforeEach(() => setup({}, context));
+
   test('should apply the style', () => {
-    expect(po.button).toHaveStyle({ color: 'red' });
+    expect(button).toHaveStyle({ color: 'red' });
   });
   test('should apply the class name', () => {
-    expect(po.button).toHaveClass('foo');
+    expect(button).toHaveClass('foo');
   });
 });
