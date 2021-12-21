@@ -1,11 +1,31 @@
 import React from 'react';
-import { DayPicker } from 'react-day-picker';
+import {
+  DayPicker,
+  DayPickerProps,
+  Matcher,
+  ModifierStatus
+} from 'react-day-picker';
 import { usePopper } from 'react-popper';
 
 import { format, isValid, parse } from 'date-fns';
 import FocusTrap from 'focus-trap-react';
 
-export default function Example() {
+interface ExampleProps {
+  disabled: DayPickerProps['disabled'];
+  onChange: (date: Date, isDisabled: boolean) => void;
+}
+
+/**
+ * Stub function
+ */
+function isMatch(date: Date, matcher: Matcher | Matcher[]) {
+  return false;
+}
+
+export default function Example({
+  onChange,
+  disabled
+}: ExampleProps) {
   const [selected, setSelected] = React.useState<Date>();
   const [inputValue, setInputValue] = React.useState<string>('');
   const [isPopperOpen, setIsPopperOpen] = React.useState(false);
@@ -38,8 +58,10 @@ export default function Example() {
     const date = parse(value, 'P', new Date());
     if (isValid(date)) {
       setSelected(date);
+      onChange(date, isMatch(date, disabled));
     } else {
       setSelected(undefined);
+      onChange(null, null);
     }
   };
 
@@ -47,14 +69,24 @@ export default function Example() {
     setIsPopperOpen(true);
   };
 
-  const handleDaySelect = (date: Date | undefined) => {
-    setSelected(date);
+  const handleDaySelect = (
+    date: Date | undefined,
+    _: Date,
+    modifiers: ModifierStatus
+  ) => {
+    if (modifiers.disabled) {
+      return;
+    }
+
     if (date) {
       setInputValue(formatDate(date));
       closePopper();
     } else {
       setInputValue('');
     }
+
+    setSelected(date);
+    onChange(date, false);
   };
 
   const ariaLabel = selected
